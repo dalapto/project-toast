@@ -3,28 +3,15 @@ import React from "react";
 import Button from "../Button";
 
 import styles from "./ToastPlayground.module.css";
-import Toast from "../Toast/Toast";
 import ToastShelf from "../ToastShelf/ToastShelf";
+import { ToastContext } from "../ToastProvider/ToastProvider";
 
 const VARIANT_OPTIONS = ["notice", "warning", "success", "error"];
 
 function ToastPlayground() {
-	const [activeVariant, setActiveVariant] = React.useState("notice");
+	const [selectedVariant, setSelectedVariant] = React.useState(VARIANT_OPTIONS[0]);
 	const [message, setMessage] = React.useState("");
-	const [liveToasts, setLiveToasts] = React.useState({});
-
-	function handleDismissToast(id) {
-		const updatedToasts = { ...liveToasts };
-		delete updatedToasts[id];
-		setLiveToasts(updatedToasts);
-	}
-
-	function handleCreateToast(variant, content) {
-		const updatedToasts = { ...liveToasts };
-		const id = Math.random();
-		updatedToasts[id] = { variant: variant, content: content };
-		setLiveToasts(updatedToasts);
-	}
+	const { toasts, createToast } = React.useContext(ToastContext);
 
 	return (
 		<div className={styles.wrapper}>
@@ -33,14 +20,14 @@ function ToastPlayground() {
 				<h1>Toast Playground</h1>
 			</header>
 
-			<ToastShelf liveToasts={liveToasts} handleDismiss={handleDismissToast} />
+			<ToastShelf toasts={toasts} />
 
 			<form
 				onSubmit={(event) => {
 					event.preventDefault();
 					if (message == "") return;
-					handleCreateToast(activeVariant, message);
-					setActiveVariant("notice");
+					createToast(selectedVariant, message);
+					setSelectedVariant("notice");
 					setMessage("");
 				}}
 			>
@@ -64,19 +51,19 @@ function ToastPlayground() {
 					<div className={styles.row}>
 						<div className={styles.label}>Variant</div>
 						<div className={`${styles.inputWrapper} ${styles.radioWrapper}`}>
-							{VARIANT_OPTIONS.map((name) => {
-								const variantName = `variant-${name}`;
+							{VARIANT_OPTIONS.map((option) => {
+								const id = `variant-${option}`;
 								return (
-									<label htmlFor={variantName} key={variantName}>
+									<label htmlFor={id} key={id}>
 										<input
-											id={variantName}
+											id={id}
 											type="radio"
 											name="variant"
-											onChange={() => setActiveVariant(name)}
-											checked={name == activeVariant}
-											value={name}
+											onChange={() => setSelectedVariant(option)}
+											checked={option == selectedVariant}
+											value={option}
 										/>
-										{name}
+										{option}
 									</label>
 								);
 							})}
